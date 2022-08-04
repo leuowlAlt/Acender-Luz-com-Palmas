@@ -1,0 +1,71 @@
+// Os números associados a cada variável seguem o guia de conexões e representam as portas digitais usadas. 
+#define releUm 4
+#define releDois 7
+#define sensorSom 2
+
+/***************************************************************************** */
+
+/************************ VARIÁVEIS AUXILIARES ******************************* */
+
+// Essas variáveis definem alguns parâmetros do programa e auxiliam na detecção e contagem das palmas.
+int delayfinal = 100;         
+int duracaoPalma = 200;     
+int intervaloPalmas = 500;  
+int quantidadePalmas = 0;  
+long momentoPalma = 0;      
+long esperaPalmas = 0;      
+
+/***************************************************************************** */
+
+/******************* CONFIGURAÇÕES INICIAIS DO CÓDIGO ************************ */
+
+void setup() {
+
+  // Definição da função de cada pino, se vão receber (INPUT) ou enviar (OUTPUT) informações.
+  pinMode(sensorSom,INPUT);
+  pinMode(releUm,OUTPUT);
+  pinMode(releDois,OUTPUT);
+
+  
+  digitalWrite(releUm,HIGH);
+  digitalWrite(releDois,HIGH);
+}
+
+/***************************************************************************** */
+
+/********************* EXECUÇÃO DO CÓDIGO QUE SE REPETE ********************** */
+
+void loop() {
+  
+  //Faz a leitura digital do sensor de som, quando este sensor detecta som ele desliga a porta de entrada, mudando seu estado para HIGH e quando não detecta mantem em LOW.
+  int leituraSom = digitalRead(sensorSom);
+  
+  //Ações quando o sensor detectar som, ou seja, entrar em HIGH. 
+  if (leituraSom == HIGH) {
+    
+     //Marca o momento da palma, soma a quantidade de palmas e aguarda um intervalo para não marcar a mesma palma mais de uma vez. 
+     if (momentoPalma == 0) {
+        momentoPalma = esperaPalmas = millis();
+        quantidadePalmas = quantidadePalmas + 1; 
+     } else if ((millis() - momentoPalma) >= duracaoPalma) {
+        momentoPalma = 0;
+     }
+  }
+
+  //Verifica se nenhuma palma mais pode ser dada, e em seguida faz o acionamento dos relés conforme o número de palmas já registrado. 
+  if (((millis() - esperaPalmas) > intervaloPalmas) && (quantidadePalmas != 0)) {
+    
+    if(quantidadePalmas == 2){
+       digitalWrite(releUm, !digitalRead(releUm));  
+       }
+    if(quantidadePalmas == 3){
+       digitalWrite(releDois, !digitalRead(releDois)); 
+       }  
+
+     delay(delayfinal);     
+     quantidadePalmas = 0; 
+   }
+    
+}
+
+/***************************************************************************** */
